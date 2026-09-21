@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import pg from 'pg';
 
 const { Client } = pg;
-dotenv.config();
+dotenv.config({ override: true });
 
 const client = new Client({ connectionString: process.env.DATABASE_URL });
 const migrationsDir = path.resolve('db/migrations');
@@ -23,7 +23,7 @@ try {
     .sort();
 
   for (const file of files) {
-    const version = file.replace(/\.sql$/, '');
+    const version = file.replace(/\\.sql$/, '');
     const exists = await client.query('SELECT 1 FROM schema_migrations WHERE version = $1', [version]);
     if (exists.rowCount) {
       console.log(`skip ${file}`);
