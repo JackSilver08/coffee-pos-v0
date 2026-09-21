@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   extract:
-    if: ${{ !contains(github.event.head_commit.message, 'ci: extract v1 source') }}
+    if: github.event.head_commit.message == 'ci: stage v1 payload 2'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout v1
@@ -17,12 +17,19 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Rebuild source archive
+        run: |
+          test -f _release/v1-part-1.b64
+          test -f _release/v1-part-2.b64
+          cat _release/v1-part-1.b64 _release/v1-part-2.b64 > _release/coffee-pos-v1.zip.b64
+          base64 -d _release/coffee-pos-v1.zip.b64 > _release/coffee-pos-v1.zip
+
       - name: Extract packaged source
         run: |
           rm -rf .v1-extracted
           mkdir -p .v1-extracted
           unzip -q _release/coffee-pos-v1.zip -d .v1-extracted
-          cp -a .v1-extracted/coffee-pos-v1/. ./ 
+          cp -a .v1-extracted/coffee-pos-v1/. ./
           rm -rf .v1-extracted _release
 
       - name: Commit extracted source
