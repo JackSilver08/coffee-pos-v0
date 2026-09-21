@@ -1,11 +1,11 @@
 {
-  "name": "coffee-pos-v0",
-  "version": "0.1.0",
-  "description": "Modern offline-first coffee shop POS v0 with Electron, Node.js, Express and PostgreSQL.",
+  "name": "coffee-pos-v1",
+  "version": "1.0.0",
+  "description": "Modern offline-first coffee shop POS v1 with Electron, Node.js, Express, PostgreSQL and role-based access control.",
   "main": "src/main/main.js",
   "type": "module",
   "scripts": {
-    "dev": "npm run db:setup && electron .",
+    "dev": "electron .",
     "start": "electron .",
     "db:migrate": "node scripts/migrate.js",
     "db:seed": "node scripts/seed.js",
@@ -14,7 +14,8 @@
     "lint": "node --check src/main/main.js && node --check src/server/index.js && node --check src/server/app.js && node --check src/server/db.js && node --check src/preload/preload.js && node --check src/renderer/app.js && node --check scripts/migrate.js && node --check scripts/seed.js",
     "test": "node --test",
     "dist": "electron-builder",
-    "pack": "electron-builder --dir"
+    "pack": "electron-builder --dir",
+    "dev:setup": "npm run db:setup && electron ."
   },
   "dependencies": {
     "bootstrap": "^5.3.8",

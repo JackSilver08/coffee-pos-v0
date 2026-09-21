@@ -1,7 +1,8 @@
 import dotenv from 'dotenv';
 import pg from 'pg';
+import { hashPassword } from '../src/server/auth.js';
 
-dotenv.config();
+dotenv.config({ override: true });
 const { Client } = pg;
 const client = new Client({ connectionString: process.env.DATABASE_URL });
 
@@ -30,6 +31,12 @@ const data = {
   ]
 };
 
+const users = [
+  { username: 'admin', displayName: 'Quản trị viên', role: 'admin', password: 'admin123' },
+  { username: 'cashier', displayName: 'Thu ngân 01', role: 'cashier', password: 'cashier123' },
+  { username: 'barista', displayName: 'Barista 01', role: 'barista', password: 'barista123' }
+];
+
 await client.connect();
 try {
   let sortOrder = 1;
@@ -56,7 +63,20 @@ try {
     }
   }
 
-  console.log('Seed completed.');
+  for (const user of users) {
+    const passwordHash = await hashPassword(user.password);
+    await client.query(`
+      INSERT INTO users (username, display_name, password_hash, role, active)
+      VALUES ($1, $2, $3, $4, TRUE)
+      ON CONFLICT (username) DO UPDATE SET
+        display_name = EXCLUDED.display_name,
+        password_hash = EXCLUDED.password_hash,
+        role = EXCLUDED.role,
+        active = TRUE
+    `, [user.username, user.displayName, passwordHash, user.role]);
+  }
+
+  console.log('Seed completed. Demo accounts: admin/admin123, cashier/cashier123, barista/barista123');
 } finally {
   await client.end();
 }
