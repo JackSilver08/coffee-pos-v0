@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import app, { closeDatabase, waitForDatabase } from './app.js';
 
-dotenv.config();
+dotenv.config({ override: true });
 
 const port = Number(process.env.PORT || 4782);
 
