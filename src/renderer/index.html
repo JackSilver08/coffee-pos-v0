@@ -2,172 +2,142 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'; connect-src http://127.0.0.1:4782; img-src 'self' data:;">
-  <title>Coffee POS</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Coffee POS v1</title>
   <link rel="stylesheet" href="../../node_modules/bootstrap/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <div class="app-shell">
+  <div id="loginView" class="login-shell">
+    <div class="login-card">
+      <div class="brand-mark">☕</div>
+      <div class="eyebrow">COFFEE POS</div>
+      <h1>Đăng nhập</h1>
+      <p class="text-muted small">Bản v1 • local-first</p>
+      <form id="loginForm" class="mt-4">
+        <label class="form-label">Tài khoản</label>
+        <input id="username" class="form-control form-control-lg mb-3" autocomplete="username" required>
+        <label class="form-label">Mật khẩu</label>
+        <input id="password" type="password" class="form-control form-control-lg mb-3" autocomplete="current-password" required>
+        <div id="loginError" class="alert alert-danger d-none py-2 small"></div>
+        <button class="btn btn-primary btn-lg w-100">Đăng nhập</button>
+      </form>
+      <div class="demo-hint mt-4">
+        <div><b>Demo:</b> admin/admin123</div>
+        <div>cashier/cashier123</div>
+        <div>barista/barista123</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="appView" class="app-shell d-none">
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-mark">☕</div>
-        <div>
-          <div class="brand-name">Coffee POS</div>
-          <div class="brand-subtitle">v0.1 • Local-first</div>
-        </div>
+        <div><b>Coffee POS</b><div class="brand-subtitle">v1.0</div></div>
       </div>
-
-      <nav class="nav-stack">
-        <button class="nav-item active" data-section="sale">🧾 <span>Bán hàng</span></button>
-        <button class="nav-item" data-section="products">☕ <span>Sản phẩm</span></button>
-        <button class="nav-item" data-section="reports">📊 <span>Báo cáo</span></button>
-      </nav>
-
+      <div id="navStack" class="nav-stack"></div>
       <div class="sidebar-footer">
-        <div class="connection-pill" id="connectionPill"><span class="dot"></span> Local API</div>
-        <div class="small text-secondary">PostgreSQL • LAN-ready architecture</div>
+        <div class="user-line">
+          <div id="userAvatar" class="avatar">?</div>
+          <div class="min-width-0">
+            <div id="userName" class="user-name"></div>
+            <div id="userRole" class="user-role"></div>
+          </div>
+        </div>
+        <button id="logoutButton" class="btn btn-outline-light btn-sm w-100 mt-3">Đăng xuất</button>
       </div>
     </aside>
 
     <main class="main-content">
-      <header class="topbar">
+      <div class="topbar">
         <div>
-          <div class="eyebrow">POINT OF SALE</div>
-          <h1 class="page-title" id="pageTitle">Bán hàng</h1>
+          <div class="eyebrow">STORE OPERATIONS</div>
+          <h1 id="pageTitle" class="page-title">Bán hàng</h1>
         </div>
-        <div class="d-flex align-items-center gap-2">
-          <div class="shift-card" id="shiftCard">
-            <div class="shift-status">Chưa mở ca</div>
-            <div class="shift-caption">Thu ngân chưa bắt đầu ca</div>
-          </div>
-          <button class="btn btn-dark" id="shiftButton">Mở ca</button>
-        </div>
-      </header>
+        <div id="shiftCard" class="shift-card"></div>
+      </div>
 
-      <section class="section-view active" id="saleSection">
+      <section id="saleSection" class="section-view active">
         <div class="sale-layout">
-          <div class="catalog-panel">
-            <div class="catalog-toolbar">
-              <div class="category-tabs" id="categoryTabs"></div>
-              <div class="search-wrap">
-                <span>⌕</span>
-                <input id="searchInput" class="search-input" placeholder="Tìm món..." autocomplete="off">
-              </div>
+          <div class="panel">
+            <div class="panel-toolbar">
+              <div id="categoryTabs" class="category-tabs"></div>
+              <input id="searchInput" class="form-control search-input" placeholder="Tìm món...">
             </div>
-            <div class="product-grid" id="productGrid"></div>
+            <div id="productGrid" class="product-grid"></div>
           </div>
-
-          <aside class="cart-panel">
-            <div class="cart-header">
-              <div>
-                <div class="eyebrow">CURRENT ORDER</div>
-                <h2 class="cart-title">Đơn hàng</h2>
-              </div>
-              <button class="btn btn-sm btn-light border" id="clearCartButton">Xóa</button>
-            </div>
-
-            <div class="cart-items" id="cartItems">
-              <div class="empty-cart">
-                <div class="empty-icon">🛒</div>
-                <div class="fw-semibold">Chưa có món</div>
-                <div class="small text-secondary">Chọn sản phẩm bên trái để bắt đầu.</div>
-              </div>
-            </div>
-
+          <div class="panel cart-panel">
+            <div class="panel-heading"><h2>Đơn hàng</h2><span id="cartCount" class="badge text-bg-light">0</span></div>
+            <div id="cartItems" class="cart-items"></div>
             <div class="checkout-box">
-              <div class="summary-row"><span>Tạm tính</span><strong id="subtotalText">0 ₫</strong></div>
-              <div class="summary-row"><span>Giảm giá</span><strong>0 ₫</strong></div>
-              <div class="summary-row grand-total"><span>TỔNG</span><strong id="totalText">0 ₫</strong></div>
-
-              <div class="payment-tabs" id="paymentTabs">
-                <button class="payment-tab active" data-payment="CASH">💵 Tiền mặt</button>
-                <button class="payment-tab" data-payment="QR">▦ QR</button>
+              <div class="summary-row"><span>Tạm tính</span><b id="subtotalValue">0 ₫</b></div>
+              <div class="summary-row total"><span>Tổng</span><b id="totalValue">0 ₫</b></div>
+              <div class="payment-tabs mt-3">
+                <button data-payment="CASH" class="payment-tab active">Tiền mặt</button>
+                <button data-payment="QR" class="payment-tab">QR demo</button>
               </div>
-
-              <label class="form-label small fw-semibold mb-1" for="cashReceived">Tiền khách đưa</label>
-              <input id="cashReceived" class="form-control form-control-lg money-input" type="number" min="0" step="1000" placeholder="0">
-              <div class="change-row"><span>Tiền thừa</span><strong id="changeText">0 ₫</strong></div>
-
-              <button class="btn btn-primary checkout-button" id="checkoutButton" disabled>Thanh toán</button>
+              <div id="cashBox">
+                <label class="form-label small">Khách đưa</label>
+                <input id="receivedAmount" type="number" min="0" step="1000" class="form-control">
+                <div class="summary-row mt-2"><span>Tiền thừa</span><b id="changeValue">0 ₫</b></div>
+              </div>
+              <button id="payButton" class="btn btn-primary btn-lg w-100 mt-3">Thanh toán</button>
             </div>
-          </aside>
-        </div>
-      </section>
-
-      <section class="section-view" id="productsSection">
-        <div class="section-card">
-          <div class="section-card-header">
-            <div>
-              <div class="eyebrow">CATALOG</div>
-              <h2>Danh sách sản phẩm</h2>
-            </div>
-            <div class="small text-secondary">v0: xem dữ liệu từ PostgreSQL</div>
-          </div>
-          <div class="table-responsive">
-            <table class="table align-middle mb-0">
-              <thead><tr><th>SKU</th><th>Tên</th><th>Danh mục</th><th class="text-end">Giá</th></tr></thead>
-              <tbody id="productsTableBody"></tbody>
-            </table>
           </div>
         </div>
       </section>
 
-      <section class="section-view" id="reportsSection">
+      <section id="kdsSection" class="section-view">
+        <div class="panel"><div class="panel-heading"><div><div class="eyebrow">KDS</div><h2>Bar / Kitchen Display</h2></div><button id="refreshKds" class="btn btn-outline-secondary btn-sm">Làm mới</button></div><div id="kdsGrid" class="kds-grid"></div></div>
+      </section>
+
+      <section id="productsSection" class="section-view">
+        <div class="panel">
+          <div class="panel-heading"><div><div class="eyebrow">ADMIN</div><h2>Sản phẩm</h2></div></div>
+          <form id="productForm" class="row g-2 mb-3">
+            <div class="col-md-2"><input id="pSku" class="form-control" placeholder="SKU"></div>
+            <div class="col-md-3"><input id="pName" class="form-control" placeholder="Tên món" required></div>
+            <div class="col-md-3"><select id="pCategory" class="form-select" required></select></div>
+            <div class="col-md-2"><input id="pPrice" class="form-control" type="number" min="0" step="1000" placeholder="Giá" required></div>
+            <div class="col-md-2"><button class="btn btn-primary w-100">Thêm món</button></div>
+          </form>
+          <form id="categoryForm" class="row g-2 mb-4">
+            <div class="col-md-8"><input id="cName" class="form-control" placeholder="Tên danh mục" required></div>
+            <div class="col-md-2"><input id="cOrder" class="form-control" type="number" value="0"></div>
+            <div class="col-md-2"><button class="btn btn-outline-primary w-100">Thêm danh mục</button></div>
+          </form>
+          <div class="table-responsive"><table class="table align-middle"><thead><tr><th>SKU</th><th>Tên</th><th>Danh mục</th><th>Giá</th><th>Trạng thái</th><th></th></tr></thead><tbody id="productsTable"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="reportsSection" class="section-view">
         <div class="stats-grid">
-          <div class="stat-card"><div class="stat-label">Đơn hôm nay</div><div class="stat-value" id="reportOrderCount">0</div></div>
-          <div class="stat-card"><div class="stat-label">Doanh thu hôm nay</div><div class="stat-value" id="reportRevenue">0 ₫</div></div>
-          <div class="stat-card"><div class="stat-label">Mặt hàng bán</div><div class="stat-value" id="reportItemCount">0</div></div>
+          <div class="stat-card"><div class="stat-label">Đơn hôm nay</div><div id="reportOrders" class="stat-value">0</div></div>
+          <div class="stat-card"><div class="stat-label">Doanh thu</div><div id="reportRevenue" class="stat-value">0 ₫</div></div>
+          <div class="stat-card"><div class="stat-label">Giá trị đơn TB</div><div id="reportAverage" class="stat-value">0 ₫</div></div>
         </div>
-        <div class="section-card mt-3">
-          <div class="section-card-header"><div><div class="eyebrow">TOP PRODUCTS</div><h2>Món bán chạy</h2></div></div>
-          <div id="topProducts" class="top-products"></div>
-        </div>
-        <div class="section-card mt-3">
-          <div class="section-card-header"><div><div class="eyebrow">RECENT ORDERS</div><h2>Đơn gần đây</h2></div></div>
-          <div class="table-responsive">
-            <table class="table align-middle mb-0">
-              <thead><tr><th>Mã đơn</th><th>Thời gian</th><th>SL món</th><th>Thanh toán</th><th class="text-end">Tổng</th></tr></thead>
-              <tbody id="ordersTableBody"></tbody>
-            </table>
-          </div>
+        <div class="panel mt-3"><div class="panel-heading"><h2>Top món</h2></div><div id="topProducts" class="top-grid"></div></div>
+      </section>
+
+      <section id="usersSection" class="section-view">
+        <div class="panel">
+          <div class="panel-heading"><div><div class="eyebrow">ADMIN</div><h2>Người dùng</h2></div></div>
+          <form id="userForm" class="row g-2 mb-4">
+            <div class="col-md-2"><input id="uUsername" class="form-control" placeholder="username" required></div>
+            <div class="col-md-3"><input id="uDisplayName" class="form-control" placeholder="Tên hiển thị" required></div>
+            <div class="col-md-2"><input id="uPassword" class="form-control" type="password" placeholder="password" required></div>
+            <div class="col-md-2"><select id="uRole" class="form-select"><option value="cashier">cashier</option><option value="barista">barista</option><option value="admin">admin</option></select></div>
+            <div class="col-md-3"><button class="btn btn-primary w-100">Tạo tài khoản</button></div>
+          </form>
+          <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Username</th><th>Tên</th><th>Role</th><th>Trạng thái</th><th></th></tr></thead><tbody id="usersTable"></tbody></table></div>
         </div>
       </section>
     </main>
   </div>
 
-  <div class="modal fade" id="shiftModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 rounded-4 shadow">
-        <div class="modal-header border-0"><h5 class="modal-title">Mở ca bán hàng</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-        <div class="modal-body pt-0">
-          <label class="form-label">Tên thu ngân</label>
-          <input id="openedBy" class="form-control mb-3" value="Thu ngân 01">
-          <label class="form-label">Tiền đầu ca</label>
-          <input id="openingCash" class="form-control" type="number" min="0" step="1000" value="0">
-        </div>
-        <div class="modal-footer border-0"><button class="btn btn-primary" id="openShiftConfirm">Bắt đầu ca</button></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="closeShiftModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 rounded-4 shadow">
-        <div class="modal-header border-0"><h5 class="modal-title">Đóng ca</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-        <div class="modal-body pt-0">
-          <div class="small text-secondary mb-2">Nhập số tiền mặt thực tế trong ngăn kéo.</div>
-          <label class="form-label">Tiền cuối ca</label>
-          <input id="closingCash" class="form-control" type="number" min="0" step="1000" value="0">
-        </div>
-        <div class="modal-footer border-0"><button class="btn btn-dark" id="closeShiftConfirm">Đóng ca</button></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div id="appToast" class="toast" role="alert"><div class="d-flex"><div class="toast-body" id="toastMessage">Ready</div><button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button></div></div>
+  <div id="appToast" class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div class="toast" role="alert"><div id="toastMessage" class="toast-body"></div></div>
   </div>
 
   <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
