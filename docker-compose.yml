@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: coffee-pos-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: coffee_pos
+      POSTGRES_USER: pos
+      POSTGRES_PASSWORD: pos
+    ports:
+      - "5433:5432"
+    volumes:
+      - coffee_pos_pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pos -d coffee_pos"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  coffee_pos_pgdata:

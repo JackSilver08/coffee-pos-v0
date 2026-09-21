@@ -1,0 +1,47 @@
+{
+  "name": "coffee-pos-v0",
+  "version": "0.1.0",
+  "description": "Modern offline-first coffee shop POS v0 with Electron, Node.js, Express and PostgreSQL.",
+  "main": "src/main/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "npm run db:setup && electron .",
+    "start": "electron .",
+    "db:migrate": "node scripts/migrate.js",
+    "db:seed": "node scripts/seed.js",
+    "db:setup": "npm run db:migrate && npm run db:seed",
+    "server": "node src/server/index.js",
+    "lint": "node --check src/main/main.js && node --check src/server/index.js && node --check src/server/app.js && node --check src/server/db.js && node --check src/preload/preload.js && node --check src/renderer/app.js && node --check scripts/migrate.js && node --check scripts/seed.js",
+    "test": "node --test",
+    "dist": "electron-builder",
+    "pack": "electron-builder --dir"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.8",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "electron": "^44.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "vn.coffee.pos",
+    "productName": "Coffee POS",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "src/**/*",
+      "db/**/*",
+      "scripts/**/*",
+      "package.json",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    }
+  }
+}
