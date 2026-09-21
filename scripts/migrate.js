@@ -10,6 +10,7 @@ const client = new Client({ connectionString: process.env.DATABASE_URL });
 const migrationsDir = path.resolve('db/migrations');
 
 await client.connect();
+
 try {
   await client.query(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -23,8 +24,12 @@ try {
     .sort();
 
   for (const file of files) {
-    const version = file.replace(/\\.sql$/, '');
-    const exists = await client.query('SELECT 1 FROM schema_migrations WHERE version = $1', [version]);
+    const version = file.replace(/\.sql$/, '');
+    const exists = await client.query(
+      'SELECT 1 FROM schema_migrations WHERE version = $1',
+      [version]
+    );
+
     if (exists.rowCount) {
       console.log(`skip ${file}`);
       continue;
@@ -32,9 +37,13 @@ try {
 
     const sql = await fs.readFile(path.join(migrationsDir, file), 'utf8');
     await client.query('BEGIN');
+
     try {
       await client.query(sql);
-      await client.query('INSERT INTO schema_migrations (version) VALUES ($1)', [version]);
+      await client.query(
+        'INSERT INTO schema_migrations (version) VALUES ($1)',
+        [version]
+      );
       await client.query('COMMIT');
       console.log(`applied ${file}`);
     } catch (error) {
